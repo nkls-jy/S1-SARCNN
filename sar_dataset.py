@@ -64,6 +64,17 @@ class Random8OrientationNy(object):
         assert(img.shape[0] == k)
         return img
 
+class RandomCropNy(object):
+    def __init__(self, size):
+        self.size = size
+    def __call__(self, img):
+        y1 = np.random.randint(0, img.shape[1] - self.size)
+        x1 = np.random.randint(0, img.shape[2] - self.size)
+        y2 = y1 + self.size
+        x2 = x1 + self.size
+        return img[:, y1:y2, x1:x2]
+    def __repr__(self):
+        return self.__class__.__name__ + '(size={0})'.format(self.size)
 
 class NumpyToTensor(object):
     def __call__(self, x):
@@ -82,7 +93,7 @@ class PlainImageFolder(Dataset):
             imgs = find_files(dirs, filter = filter)
 
         if len(imgs) == 0:
-            raise(RuntimeError(f"Found 0 images in subfodler of: {dirs}"))
+            raise(RuntimeError(f"Found 0 images in subfolder of: {dirs}"))
 
         self.dirs = dirs
         self.imgs = imgs
@@ -90,7 +101,7 @@ class PlainImageFolder(Dataset):
         self.transform = transform
 
     def __getitem__(self, index):
-        path = self.imgs[indes]
+        path = self.imgs[index]
         if not index in self.img_cache:
             img = self.loader(path)
             if self.cache:
@@ -106,7 +117,7 @@ class PlainImageFolder(Dataset):
     def __len__(self):
         return len(self.imgs)
 
-class PlainSARFolder(PlainImageFolder):
+class PlainSarFolder(PlainImageFolder):
     def __init__(self, dirs, transform=None, cache=False):
         PlainImageFolder.__init__(self, dirs, transform=transform, cache=cache, loader=img_loader, filter=image_filter)
         

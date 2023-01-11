@@ -1,6 +1,8 @@
 import torch
-from . import paths
-from . import sar_dataset
+#from . import paths
+#from . import sar_dataset
+import paths
+import sar_dataset
 from torchvision.transforms import Compose
 
 def create_train_realsar_dataloaders(patchsize, batchsize, trainsizeiters):

@@ -1,6 +1,7 @@
 import torch
 import os
-from utils import metrics
+import metrics
+#from utils import metrics
 from tqdm import tqdm
 import time
 import rasterio
@@ -58,7 +59,7 @@ def train_epoch(experiment, trainloader, data_preprocessing, log_data):
 
     for inputs in tqdm(trainloader):
         if experiment.use_cuda:
-            inputs = input.cuda()
+            inputs = inputs.cuda()
         experiment.optimizer.zero_grad()
 
         if log_data:
@@ -70,11 +71,24 @@ def train_epoch(experiment, trainloader, data_preprocessing, log_data):
             noisy, target = data_preprocessing(inputs)
             target_amp = target.abs().sqrt()
 
+        #print(f"########### Shapes ##########")
+        #print(f"noisy.shape: {noisy.shape}")
+        #print(f"target.shape: {target.shape}")
 
         pred = experiment.net(noisy)
 
-        pad_row = (target.shape[2] - pred.shape[2] // 2)
-        pad_col = (target.shape[3] - pred.shape[3] // 2)
+        #print(f"pred.shape: {pred.shape}")
+        #print(f"target.shape[2]: {target.shape[2]}")
+        #print(f"target.shape[3]: {target.shape[3]}")
+
+        #print(f"pred.shape[2]: {pred.shape[2]}")
+        #print(f"pred.shape[3]: {pred.shape[3]}")
+
+        pad_row = (target.shape[2] - pred.shape[2]) // 2
+        pad_col = (target.shape[3] - pred.shape[3]) // 2
+
+        #print(f"pad_row: {pad_row}")
+        #print(f"pad_col: {pad_col}")
 
         if pad_row > 0:
             target = target[:, :, pad_row:-pad_row, :]
@@ -94,13 +108,13 @@ def train_epoch(experiment, trainloader, data_preprocessing, log_data):
             stats_one["mse"] =  metrics.metric_mse(pred_amp, target_amp, size_average=True).data
             stats_one["ssim"] = metrics.metric_ssim(pred_amp, target_amp, size_average=True).data
 
-        
         loss.backward()
+
         del loss
         del pred
         del pred_amp
 
-        experiment.optimizer_step()
+        experiment.optimizer.step()
 
         for stats_key in stats_cum:
             stats_cum[stats_key] = stats_cum[stats_key] + stats_one[stats_key]
@@ -110,10 +124,10 @@ def train_epoch(experiment, trainloader, data_preprocessing, log_data):
         stats_cum[stats_key] = stats_cum[stats_key] / stats_num[stats_key]
     
     print(f"Epoch: {experiment.epoch} |", end='')
-    experiment.add_summary(f"train/epoch{experiment.epoch}")
+    experiment.add_summary("train/epoch", experiment.epoch)
     for stats_key, stats_value in stats_cum.items():
         print(f" {stats_key}: {stats_value} | ", end='')
-        experiment.add_summary(f"train/{stats_key}{stats_value}")
+        experiment.add_summary("train/" + stats_key, stats_value)
     print("")
 
     experiment.epoch += 1
@@ -171,18 +185,18 @@ def test_epoch(experiment, testloader, data_preprocessing, log_data):
             stats_one["ssim"] = metrics.metric_ssim(pred_amp, target_amp, size_average=True).data
 
             for stats_key in stats_cum:
-                            stats_cum[stats_key] = stats_cum[stats_key] + stats_one[stats_key]
-                            stats_num[stats_key] = stats_num[stats_key] + 1
+                stats_cum[stats_key] = stats_cum[stats_key] + stats_one[stats_key]
+                stats_num[stats_key] = stats_num[stats_key] + 1
 
             del pred, noisy, target
 
         for stats_key in stats_cum:
             stats_cum[stats_key] = stats_cum[stats_key] / stats_num[stats_key]
 
-        experiment.add_summary(f"test/epoch{experiment.epoch}")
+        experiment.add_summary("test/epoch", experiment.epoch)
         for stats_key, stats_value in stats_cum.items():
-            print(f" {stats_key}: {stats_value} | ", end='')
-            experiment.add_summary(f"test/{stats_key}{stats_value}")
+            print(f"{stats_key}: {stats_value} | ", end='')
+            experiment.add_summary("test/" + stats_key, stats_value)
         print("")
 
     
@@ -209,6 +223,8 @@ def test_list(experiment, outdir, listfile, pad=0):
     stats_cum = {"mse": 0, "psnr": 0, "ssim": 0}
     vetTIME = list()
 
+    print(f"listfile: {listfile}")
+
     with torch.no_grad():
         for filename in listfile:
             with rasterio.open(filename) as f:
@@ -219,13 +235,21 @@ def test_list(experiment, outdir, listfile, pad=0):
                 outending = filename.rsplit('/', 1)[1]
 
             output_filename = eval_file % outending
-
+            
             noisy_int = img[0]
+            noisy_int = torch.from_numpy(noisy_int)[None, None, :, :]
+            #noisy_int = torch.from_numpy(noisy_int)[None, :, :]
+
             target = img[1]
+
+            print(f"###### Image shapes #######")
+            print(f"img.shape: {img.shape}")
+            print(f"noisy_int.shape: {noisy_int.shape}")
+            print(f"target.shape: {target.shape}")
+
 
             timestamp = time.time()
 
-            noisy_int = torch.from_numpy(img)[None, :, :]
 
             if use_cuda:
                 noisy_int = noisy_int.cuda()
@@ -234,6 +258,9 @@ def test_list(experiment, outdir, listfile, pad=0):
         
             #noisy = experiment.preprocessing_int2net(noisy_int)
             noisy = noisy_int
+
+            print(f"noisy for input.shape: {noisy.shape}")
+
             pred = net(noisy)
 
             #pred_int = experiment.postprocessing_net2int(pred)[0, 0, :, :]
@@ -256,6 +283,12 @@ def test_list(experiment, outdir, listfile, pad=0):
             if pad_col > 0:
                 pred_img = pred_img[:, :, pad_col:-pad_col]
             
+            print(f"######## outfile dims ########")
+            print(f"pred_img.shape: {pred_img.shape}")
+            print(f"img.shape: {img.shape}")
+            print(f"target.shape: {target.shape}")        
+
+
             outfile = np.append(pred_img, img, target, axis=0)
 
             # write output file

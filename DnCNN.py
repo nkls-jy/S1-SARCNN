@@ -81,7 +81,7 @@ def make_net(nplanes_in, kernels, features, bns, acts, dilats, bn_momentum = 0.1
 
         elem = make_activation(acts[i])
         if elem is not None:
-            layers.appende(elem)
+            layers.append(elem)
 
     return nn.Sequential(*layers)
 
@@ -131,7 +131,7 @@ class NlmCNN(nn.Module):
         self.network_weights = network_weights
         self.sizearea = sizearea
         self.padding = padding
-        self.sar_data = sar_data
+        #self.sar_data = sar_data
 
     def forward_weigths(self, x, reshape=False):
         

@@ -1,7 +1,8 @@
 import os 
 import tensorboardX as tbx 
 import torch
-from . import DnCNN 
+import DnCNN
+#from . import DnCNN 
 
 class Experiment:
     def __init__(self, basedir, expname=None):
@@ -33,6 +34,9 @@ class Experiment:
 
     def create_loss(self):
         def criterion(pred, targets):
+
+            #print(f"shape of pred: {pred.shape}, shape of targets: {targets.shape}")
+
             loss = ((pred + targets) / 2.0).abs().log() - (pred.abs().log() + targets.abs().log()) / 2 #glrt
             loss = loss.view(pred.shape[0], -1)
 
@@ -43,10 +47,10 @@ class Experiment:
         args = self.args
         assert(args.optimizer == 'adam')
         parameters = utils.parameters_by_module(self.net)
-        self.base_lr = args.adamj["lr"]
+        self.base_lr = args.adam["lr"]
         optimizer = torch.optim.Adam(parameters, lr=self.base_lr, weight_decay=args.adam["weightdecay"],
                                     betas=(args.adam["beta1"], args.adam["beta2"]), eps=args.adam["eps"])
-    
+        # home machine path
         # bias parameters do not get weight decay
         for pg in optimizer.param_groups:
             if pg["name"] == "bias":
@@ -127,7 +131,7 @@ def main_sar(args):
         experiment.setup(args, use_gpu=args.use_gpu)
 
         trainloader = create_train_dataloaders(patchsize, args.batchsize, args.trainsetiters)
-        validloader = create_valid_dataloaders(args.patchsizevalid, args.batchsizevalid)
+        #validloader = create_valid_dataloaders(args.patchsizevalid, args.batchsizevalid)
         # without validation data
         trainloop(experiment, trainloader, Preprocessing(), log_data=False, validloader=None)
         # with validation data
@@ -136,7 +140,8 @@ def main_sar(args):
 if __name__ == '__main__':
     import argparse
     import os
-    from . import utils
+    import utils
+    #from . import utils
     import torch
     
     parser = argparse.ArgumentParser(description='NLM for SAR image denoising')
@@ -153,22 +158,22 @@ if __name__ == '__main__':
     parser.add_argument('--adam.lr', type=float, default=0.01) # original=0.001
 
      # Eval mode
-    parser.add_argument('--eval', default=False) #False) # action='store_false')
+    parser.add_argument('--eval', default=True) #False) # action='store_false')
     parser.add_argument('--weights', default=False) # action='store_false')
     parser.add_argument('--eval_epoch', type=int, default=50)
 
      # Training options
-    parser.add_argument("--batchsize"     , type=int, default= 32) # for home machine: 16
+    parser.add_argument("--batchsize"     , type=int, default= 16) # for home machine: 16
     parser.add_argument("--patchsize"     , type=int, default=48)# 60)#default=48)
     parser.add_argument("--batchsizevalid", type=int, default=8)
     parser.add_argument("--patchsizevalid", type=int, default=48) # original: default=256) but currently no big valid patches available
 
      # Misc
     utils.add_commandline_flag(parser, "--use_gpu", "--use_cpu", True)
-    parser.add_argument("--exp_name", default=None) #None)
+    parser.add_argument("--exp_name", default='exp0000') #None)
 
     # base experiment dir
-    base_expdir = "/home/niklas/Documents/CNNlight_Experiments"
+    base_expdir = "/home/niklas/Documents/mySARCNN_Experiment"
     parser.add_argument("--exp_basedir", default=base_expdir)
     parser.add_argument("--trainsetiters", type=int, default=100) # original: 640
     args = parser.parse_args()
@@ -176,6 +181,6 @@ if __name__ == '__main__':
 
 # execute on command line to access tensorboard interface
 # change exp000% each time 
-# tensorboard --logdir=/home/niklas/Documents/CNNlight_Experiments/exp0005/train/
+# tensorboard --logdir=/home/niklas/Documents/mySARCNN_Experiment/exp0000/train/
 
 
