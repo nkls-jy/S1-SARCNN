@@ -220,6 +220,9 @@ def test_list(experiment, outdir, listfile, pad=0):
 
             output_filename = eval_file % outending
 
+            noisy_int = img[0]
+            target = img[1]
+
             timestamp = time.time()
 
             noisy_int = torch.from_numpy(img)[None, :, :]
@@ -243,6 +246,7 @@ def test_list(experiment, outdir, listfile, pad=0):
             # create two band output array
             pred_img = pred_int.numpy()[np.newaxis, :, :]
             img = np.squeeze(img)[np.newaxis, :, :]
+            target = np.squeeze(target)[np.newaxis, :, :]
             
             pad_row = (pred_img.shape[1] - img.shape[1]) // 2
             pad_col = (pred_img.shape[2] - img.shape[2]) // 2
@@ -252,12 +256,12 @@ def test_list(experiment, outdir, listfile, pad=0):
             if pad_col > 0:
                 pred_img = pred_img[:, :, pad_col:-pad_col]
             
-            outfile = np.append(pred_img, img, axis=0)
+            outfile = np.append(pred_img, img, target, axis=0)
 
             # write output file
             kwargs.update(
                 dtype=rasterio.float32,
-                count=2,
+                count=3,
                 compress='lzw'
             )
 
