@@ -1,6 +1,7 @@
 import os 
 
-train_dir = "/home/niklas/Documents/traindata_small"
+#train_dir = "/home/niklas/Documents/traindata_small"
+train_dir = "/home/niklas/Documents/traindata_big"
 valid_dir = ""
 test_dir = "/home/niklas/Documents/testdata_big"
 

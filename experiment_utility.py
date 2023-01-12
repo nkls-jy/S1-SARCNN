@@ -236,60 +236,40 @@ def test_list(experiment, outdir, listfile, pad=0):
 
             output_filename = eval_file % outending
             
-            noisy_int = img[0]
-            noisy_int = torch.from_numpy(noisy_int)[None, None, :, :]
-            #noisy_int = torch.from_numpy(noisy_int)[None, :, :]
+            noisy_input = img[0]
+            noisy_int = torch.from_numpy(noisy_input)[None, None, :, :]
 
             target = img[1]
-
-            print(f"###### Image shapes #######")
-            print(f"img.shape: {img.shape}")
-            print(f"noisy_int.shape: {noisy_int.shape}")
-            print(f"target.shape: {target.shape}")
-
-
+            
             timestamp = time.time()
-
 
             if use_cuda:
                 noisy_int = noisy_int.cuda()
             if pad > 0:
                 noisy_int = torch.nn.functional.pad(noisy_int, (pad, pad, pad, pad), mode='reflect', value=0)
         
-            #noisy = experiment.preprocessing_int2net(noisy_int)
             noisy = noisy_int
 
-            print(f"noisy for input.shape: {noisy.shape}")
-
             pred = net(noisy)
-
-            #pred_int = experiment.postprocessing_net2int(pred)[0, 0, :, :]
             pred_int = pred[0, 0, :, :]
 
             if use_cuda:
                 pred_int = pred_int.cpu()
             vetTIME.append(time.time() - timestamp)
 
-            # create two band output array
-            pred_img = pred_int.numpy()[np.newaxis, :, :]
-            img = np.squeeze(img)[np.newaxis, :, :]
-            target = np.squeeze(target)[np.newaxis, :, :]
-            
-            pad_row = (pred_img.shape[1] - img.shape[1]) // 2
-            pad_col = (pred_img.shape[2] - img.shape[2]) // 2
+            pad_row = (pred_int.shape[0] - noisy_input.shape[0]) // 2
+            pad_col = (pred_int.shape[1] - noisy_input.shape[1]) // 2
 
             if pad_row > 0:
-                pred_img = pred_img[:, pad_row:-pad_row, :]
+                pred_int = pred_int[pad_row:-pad_row, :]
             if pad_col > 0:
-                pred_img = pred_img[:, :, pad_col:-pad_col]
-            
-            print(f"######## outfile dims ########")
-            print(f"pred_img.shape: {pred_img.shape}")
-            print(f"img.shape: {img.shape}")
-            print(f"target.shape: {target.shape}")        
+                pred_int = pred_int[:, pad_col:-pad_col]
+      
+            pred_int = pred_int.numpy()[np.newaxis, :, :]
+            noisy_input = noisy_input[np.newaxis, :, :]
+            target = target[np.newaxis, :, :]
 
-
-            outfile = np.append(pred_img, img, target, axis=0)
+            outfile = np.concatenate((pred_int, noisy_input, target))
 
             # write output file
             kwargs.update(
@@ -303,8 +283,7 @@ def test_list(experiment, outdir, listfile, pad=0):
 
             ###### Stats ########
             
-            # !!! Needs target image in input stack (e.g. as 2nd band)
-            target_int = torch.from_numpy(img[1, :, :])[None, :, :]
+            target_int = torch.from_numpy(target)[np.newaxis, :, :]
             target_amp = target_int.abs().sqrt()
 
             if use_cuda:
@@ -312,15 +291,23 @@ def test_list(experiment, outdir, listfile, pad=0):
             
             pred_amp = experiment.postprocessing_net2amp(pred)
             
-            pad_row = (pred_img.shape[1] - img.shape[1]) // 2
-            pad_col = (pred_img.shape[2] - img.shape[2]) // 2
+            pad_row = (pred_amp.shape[2] - target_amp.shape[2]) // 2
+            pad_col = (pred_amp.shape[3] - target_amp.shape[3]) // 2
+
+            print(f"pred_amp.shape: {pred_amp.shape}")
+            print(f"pad_row: {pad_row}")
+            print(f"pad_col: {pad_col}")
+            print(f"target_amp.shape: {target_amp.shape}")
 
             if pad_row > 0:
-                target_amp = target_amp[:, pad_row: -pad_row, :]
+                pred_amp = pred_amp[:, :, pad_row: -pad_row, :]
             if pad_col > 0:
-                target_amp = target_amp[:, :, pad_col: -pad_col]
+                pred_amp = pred_amp[:, :, :, pad_col: -pad_col]
             if pad_col != 0 or pad_row != 0:
                 print(f"error size {pad_col} {pad_row}")
+
+            print(f"pred_amp.shape: {pred_amp.shape}")
+            print(f"target_amp.shape: {target_amp.shape}")
 
             stats_one = dict()
             stats_one["mse"]  = metrics.metric_mse(pred_amp, target_amp, size_average=True).data
@@ -342,7 +329,7 @@ def test_list(experiment, outdir, listfile, pad=0):
     print("")
 
     # save timing    
-    fp = os.path.jon(outdir, 'time.txt')
+    fp = os.path.join(outdir, 'time.txt')
 
     with open(fp, 'w') as f:
         for t in vetTIME:
