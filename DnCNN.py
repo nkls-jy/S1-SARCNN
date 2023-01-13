@@ -162,7 +162,10 @@ Function for backnet
 """
 def make_backnet(nplanes_in, sizearea, bn_momentum=0.1, padding=False):
     depth = 10
-    features =[ 169, 225, 289, 361, 441, 529, 625, 729, 841, sizearea*sizearea]
+    # features: large sizearea
+    features = [289, 361, 441, 520, 625, 729, 841, 961, 1089, sizearea*sizearea]
+    # features: default sizearea (25)
+    #features = [169, 225, 289, 361, 441, 529, 625, 729, 841, sizearea*sizearea]
     kernels = [7, 5, 3, 3, 3, 3, 3, 3, 3, 1]
     dilats = [1, ] * depth
     acts = ['leaky_relu', ] * (depth-1) + ['softmax', ]

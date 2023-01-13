@@ -174,7 +174,7 @@ if __name__ == '__main__':
 
      # Training options
     parser.add_argument("--batchsize"     , type=int, default= 16) # for home machine: 16
-    parser.add_argument("--patchsize"     , type=int, default=60)# 60)#default=48)
+    parser.add_argument("--patchsize"     , type=int, default=48)# 60)#default=48)
     parser.add_argument("--batchsizevalid", type=int, default=8)
     parser.add_argument("--patchsizevalid", type=int, default=48) # original: default=256) but currently no big valid patches available
 
