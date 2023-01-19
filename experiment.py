@@ -128,7 +128,6 @@ def main_sar(args):
         experiment = Experiment(exp_basedir, args.exp_name)
         experiment.setup(use_gpu=args.use_gpu)
         load_checkpoint(experiment, args.eval_epoch)
-
         outdir = os.path.join(experiment.expdir, f"results{args.eval_epoch}")
         test_list(experiment, outdir, list_testfiles, pad=18)
     else:
