@@ -74,8 +74,11 @@ def train_epoch(experiment, trainloader, data_preprocessing, log_data):
         #print(f"########### Shapes ##########")
         #print(f"noisy.shape: {noisy.shape}")
         #print(f"target.shape: {target.shape}")
-
+        
         pred = experiment.net(noisy)
+
+        #print(f"nan in pred: {pred.isnan().any()}")
+        #print(f"nan in target: {target.isnan().any()}")
 
         #print(f"pred.shape: {pred.shape}")
         #print(f"target.shape[2]: {target.shape[2]}")
@@ -97,10 +100,15 @@ def train_epoch(experiment, trainloader, data_preprocessing, log_data):
             target = target[:, :, :, pad_col:-pad_col]
             target_amp = target_amp[:, :, :, pad_col:-pad_col]
 
+        #print(f"target.shape after : {target.shape}")
+
         loss = experiment.criterion(pred, target).mean()
 
         with torch.no_grad():
             pred_amp = experiment.postprocessing_net2amp(pred.detach())
+
+            #print(f"pred_amp.shape: {pred_amp.shape}")
+            #print(f"target_amp.shape: {target_amp.shape}")
 
             stats_one = dict()
             stats_one["loss"] = loss.data

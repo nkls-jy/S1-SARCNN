@@ -37,6 +37,9 @@ class PreprocessingInt:
         noisy = tl[0]
         target = tl[1]
 
+        #print(f"nan in noidy: {noisy.isnan().any()}")
+        #print(f"nan in target: {target.isnan().any()}")
+
         if batch.is_cuda:
             noisy = noisy.cuda()
             target = target.cuda()
