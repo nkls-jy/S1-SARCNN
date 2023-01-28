@@ -2,6 +2,7 @@ import os
 import tensorboardX as tbx 
 import torch
 import DnCNN
+import torch.nn as nn
 #from . import DnCNN 
 
 class Experiment:
@@ -34,10 +35,11 @@ class Experiment:
 
     def create_loss(self):
         def criterion(pred, targets):
-
-            #print(f"shape of pred: {pred.shape}, shape of targets: {targets.shape}")
-
-            loss = ((pred + targets) / 2.0).abs().log() - (pred.abs().log() + targets.abs().log()) / 2 #glrt
+            
+            #loss = nn.MSELoss()
+            #loss = loss(pred, targets)
+            loss = ((pred + targets) / 2.0).abs().log() - (pred.abs().log() + targets.abs().log()) / 2 #glrt 
+            
             loss = loss.view(pred.shape[0], -1)
 
             return loss
@@ -45,16 +47,20 @@ class Experiment:
 
     def create_optimizer(self):
         args = self.args
-        assert(args.optimizer == 'adam')
+        #assert(args.optimizer == 'adam')
         parameters = utils.parameters_by_module(self.net)
-        self.base_lr = args.adam["lr"]
-        optimizer = torch.optim.Adam(parameters, lr=self.base_lr, weight_decay=args.adam["weightdecay"],
-                                    betas=(args.adam["beta1"], args.adam["beta2"]), eps=args.adam["eps"])
-        # home machine path
-        # bias parameters do not get weight decay
-        for pg in optimizer.param_groups:
-            if pg["name"] == "bias":
-                pg["weight_decay"] = 0
+        if args.optimizer == 'sgd':
+            self.base_lr = args.baseLr
+            optimizer = torch.optim.SGD(parameters, lr=self.base_lr, momentum=0.9, weight_decay=0.3)
+        else:
+            self.base_lr = args.adam["lr"]
+            optimizer = torch.optim.Adam(parameters, lr=self.base_lr, weight_decay=args.adam["weightdecay"],
+                                        betas=(args.adam["beta1"], args.adam["beta2"]), eps=args.adam["eps"])
+            # home machine path
+            # bias parameters do not get weight decay
+            for pg in optimizer.param_groups:
+                if pg["name"] == "bias":
+                    pg["weight_decay"] = 0
 
         return optimizer
 
@@ -151,6 +157,7 @@ if __name__ == '__main__':
     import os
     import utils
     #from . import utils
+    import utils
     import torch
     
     parser = argparse.ArgumentParser(description='NLM for SAR image denoising')
@@ -159,12 +166,14 @@ if __name__ == '__main__':
 
     # Optimizer
     parser.add_argument('--optimizer', default="adam", choices=["adam", "sgd"]) # which optimizer to use
+    # parameters for SGD
+    parser.add_argument("--baseLr", type=float, default=0.000001)
     # parameters for Adam
     parser.add_argument("--adam.beta1", type=float, default=0.9)
     parser.add_argument("--adam.beta2", type=float, default=0.999)
     parser.add_argument("--adam.eps", type=float, default=1e-8)
-    parser.add_argument("--adam.weightdecay", type=float, default=1e-4)
-    parser.add_argument('--adam.lr', type=float, default=0.01) # original=0.001
+    parser.add_argument("--adam.weightdecay", type=float, default=0.01) #default=1e-4)
+    parser.add_argument('--adam.lr', type=float, default=0.0001) # original=0.001
 
      # Eval mode
     parser.add_argument('--eval', default=False) #False) # action='store_false')
@@ -172,7 +181,7 @@ if __name__ == '__main__':
     parser.add_argument('--eval_epoch', type=int, default=35) #default=50
 
      # Training options
-    parser.add_argument("--batchsize"     , type=int, default= 32) # for home machine: 16
+    parser.add_argument("--batchsize"     , type=int, default= 8) # for home machine: 16
     parser.add_argument("--patchsize"     , type=int, default=48)# 60)#default=48)
     parser.add_argument("--batchsizevalid", type=int, default=8)
     parser.add_argument("--patchsizevalid", type=int, default=48) # original: default=256) but currently no big valid patches available
@@ -184,7 +193,7 @@ if __name__ == '__main__':
     # base experiment dir
     base_expdir = "/home/niklas/Documents/mySARCNN_Experiment"
     parser.add_argument("--exp_basedir", default=base_expdir)
-    parser.add_argument("--trainsetiters", type=int, default=10) # original: 640
+    parser.add_argument("--trainsetiters", type=int, default=2) # original: 640
     args = parser.parse_args()
     main_sar(args)
 

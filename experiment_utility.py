@@ -69,18 +69,25 @@ def train_epoch(experiment, trainloader, data_preprocessing, log_data):
         else:
             # noisy_int, target_int
             noisy, target = data_preprocessing(inputs)
+            #print(f"noisy.mean: {noisy.mean()}")
+            #print(f"target.mean: {target.mean()}")
             target_amp = target.abs().sqrt()
+            #print(f"target_amp.mean: {target_amp.mean()}")
 
         #print(f"########### Shapes ##########")
         #print(f"noisy.shape: {noisy.shape}")
         #print(f"target.shape: {target.shape}")
+        #print(f"noisy inf: {noisy.isinf().any()}")
+        #print(f"target inf: {target.isinf().any()}")
         
         pred = experiment.net(noisy)
-
+        #print(f"pred.mean: {pred.mean()}")
+        #print(f"pred inf: {pred.isinf().any()}")
         #print(f"nan in pred: {pred.isnan().any()}")
         #print(f"nan in target: {target.isnan().any()}")
 
         #print(f"pred.shape: {pred.shape}")
+        #print(f"target.shape: {target.shape}")
         #print(f"target.shape[2]: {target.shape[2]}")
         #print(f"target.shape[3]: {target.shape[3]}")
 
@@ -102,11 +109,26 @@ def train_epoch(experiment, trainloader, data_preprocessing, log_data):
 
         #print(f"target.shape after : {target.shape}")
 
+        #print(f"pred minmax: {pred.aminmax()}")
+        print(f"target.abs minmax: {target.abs().aminmax()}")
+        print(f"target.abs.log minmax: {target.abs().log().aminmax()}")
+        
+        calc = ((pred + target) / 2.0).abs().log()
+        #print(f"calc: {calc.aminmax()}")
+
+        calc2 = (pred.abs().log() )#+ target.abs().log())
+        calc3 = (target.abs().log())
+        #print(f"calc2: {calc2.aminmax()}")
+        #print(f"calc3: {calc3.aminmax()}")
         loss = experiment.criterion(pred, target).mean()
 
-        with torch.no_grad():
-            pred_amp = experiment.postprocessing_net2amp(pred.detach())
+        print(f"loss item: {loss.item()}")
+        #print(f"loss is nan: {loss.isnan().any()}")
 
+        with torch.no_grad():
+  
+            pred_amp = experiment.postprocessing_net2amp(pred.detach())
+            #print(f"pred_amp is nan: {pred_amp.isnan().any()}")
             #print(f"pred_amp.shape: {pred_amp.shape}")
             #print(f"target_amp.shape: {target_amp.shape}")
 
@@ -129,6 +151,7 @@ def train_epoch(experiment, trainloader, data_preprocessing, log_data):
             stats_num[stats_key] = stats_num[stats_key] + 1
 
     for stats_key in stats_cum:
+
         stats_cum[stats_key] = stats_cum[stats_key] / stats_num[stats_key]
     
     print(f"Epoch: {experiment.epoch} |", end='')

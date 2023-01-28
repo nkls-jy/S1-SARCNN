@@ -37,6 +37,8 @@ class PreprocessingInt:
         noisy = tl[0]
         target = tl[1]
 
+        #print(f"noisy inf: {noisy.isinf().any()}")
+        #print(f"target inf: {target.isinf().any()}")
         #print(f"nan in noidy: {noisy.isnan().any()}")
         #print(f"nan in target: {target.isnan().any()}")
 

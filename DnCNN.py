@@ -74,14 +74,20 @@ def make_net(nplanes_in, kernels, features, bns, acts, dilats, bn_momentum = 0.1
         conv_init(elem, act=acts[i])
         layers.append(elem)
 
+        elem = make_activation(acts[i])
+        if elem is not None:
+            layers.append(elem)
+        
         if bns[i]:
             elem = nn.BatchNorm2d(features[i], momentum = bn_momentum)
             batchnorm_init(elem, kernelsize=kernels[i])
             layers.append(elem)
-
-        elem = make_activation(acts[i])
-        if elem is not None:
-            layers.append(elem)
+        
+        #print(f"depth % 3: {i % 3}")
+        #print(i)
+        #if i > 1 and i < depth-1 and i % 3 == 0:
+        #    print(f"adding Dropout")
+        #    layers.append(nn.Dropout2d(p=0.5))
 
     return nn.Sequential(*layers)
 
@@ -135,13 +141,14 @@ class NlmCNN(nn.Module):
 
     def forward_weigths(self, x, reshape=False):
         
-        x_in = x.abs().log() / 2.0
+        #x_in = x.abs().log() / 2.0
 
         #if self.sar_data:
         #    x_in = x.abs().log() / 2.0
         #else:
         #    x_in = x
-    
+        x_in = x
+        
         w = self.network_weights(x_in)
 
         if reshape:
@@ -161,17 +168,19 @@ class NlmCNN(nn.Module):
 Function for backnet
 """
 def make_backnet(nplanes_in, sizearea, bn_momentum=0.1, padding=False):
-    depth = 15
+    #depth = 15
+    depth = 12
     # features: large sizearea, deep network
-    features = [225, 256, 289, 324, 361, 441, 520, 625, 729, 841, 961, 1089, 1156, 1225, sizearea*sizearea]
+    #features = [225, 256, 289, 324, 361, 441, 520, 625, 729, 841, 961, 1089, 1156, 1225, sizearea*sizearea]
     # features: large sizearea
     #features = [289, 361, 441, 520, 625, 729, 841, 961, 1089, sizearea*sizearea]
     # features: default sizearea (25)
+    features = [169, 225, 289, 361, 441, 529, 625, 729, 841, 961, 1089, sizearea*sizearea]
     #features = [169, 225, 289, 361, 441, 529, 625, 729, 841, sizearea*sizearea]
-    #kernels = [7, 5, 3, 3, 3, 3, 3, 3, 3, 1]
+    kernels = [5, 5, 3, 3, 3, 3, 3, 3, 3, 3, 3, 1]
     #kernels = [7, 5, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 1]
-    #kernels = [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 1]
-    kernels = [5, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 1]
+    #kernels = [5, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 1]
+    #kernels = [5, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 1]
     dilats = [1, ] * depth
     acts = ['leaky_relu', ] * (depth-1) + ['softmax', ]
     bns = [False, ] + [True, ] * (depth-2) + [False, ]
