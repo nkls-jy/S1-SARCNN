@@ -110,8 +110,8 @@ def train_epoch(experiment, trainloader, data_preprocessing, log_data):
         #print(f"target.shape after : {target.shape}")
 
         #print(f"pred minmax: {pred.aminmax()}")
-        print(f"target.abs minmax: {target.abs().aminmax()}")
-        print(f"target.abs.log minmax: {target.abs().log().aminmax()}")
+        #print(f"target.abs minmax: {target.abs().aminmax()}")
+        #print(f"target.abs.log minmax: {target.abs().log().aminmax()}")
         
         calc = ((pred + target) / 2.0).abs().log()
         #print(f"calc: {calc.aminmax()}")
@@ -122,7 +122,7 @@ def train_epoch(experiment, trainloader, data_preprocessing, log_data):
         #print(f"calc3: {calc3.aminmax()}")
         loss = experiment.criterion(pred, target).mean()
 
-        print(f"loss item: {loss.item()}")
+        #print(f"loss item: {loss.item()}")
         #print(f"loss is nan: {loss.isnan().any()}")
 
         with torch.no_grad():
@@ -281,6 +281,8 @@ def test_list(experiment, outdir, listfile, pad=0):
         
             noisy = noisy_int
 
+            print(f"noisy for prediction shape: {noisy.shape}")
+
             pred = net(noisy)
             pred_int = pred[0, 0, :, :]
 
@@ -291,14 +293,28 @@ def test_list(experiment, outdir, listfile, pad=0):
             pad_row = (pred_int.shape[0] - noisy_input.shape[0]) // 2
             pad_col = (pred_int.shape[1] - noisy_input.shape[1]) // 2
 
+            print(f"pad_row: {pad_row}")
+            print(f"pad_col: {pad_col}")
+
+            # To Do: 
+            # Check output shape of prediction and adapt clipping of input_noisy & target image
+
             if pad_row > 0:
                 pred_int = pred_int[pad_row:-pad_row, :]
+            if pad_row < 0:
+                noisy_input = noisy_input[pad_row:-pad_row, :]
+            
             if pad_col > 0:
                 pred_int = pred_int[:, pad_col:-pad_col]
       
             pred_int = pred_int.numpy()[np.newaxis, :, :]
             noisy_input = noisy_input[np.newaxis, :, :]
             target = target[np.newaxis, :, :]
+
+            print(f"pred_int shape: {pred_int.shape}")
+            print(f"noisy_input shape: {noisy_input.shape}")
+            print(f"target shape: {target.shape}")
+
 
             outfile = np.concatenate((pred_int, noisy_input, target))
 

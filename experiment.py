@@ -173,10 +173,10 @@ if __name__ == '__main__':
     parser.add_argument("--adam.beta2", type=float, default=0.999)
     parser.add_argument("--adam.eps", type=float, default=1e-8)
     parser.add_argument("--adam.weightdecay", type=float, default=0.01) #default=1e-4)
-    parser.add_argument('--adam.lr', type=float, default=0.0001) # original=0.001
+    parser.add_argument('--adam.lr', type=float, default=0.001) # original=0.001
 
      # Eval mode
-    parser.add_argument('--eval', default=False) #False) # action='store_false')
+    parser.add_argument('--eval', default=True) #False) # action='store_false')
     parser.add_argument('--weights', default=False) # action='store_false')
     parser.add_argument('--eval_epoch', type=int, default=35) #default=50
 
@@ -188,12 +188,12 @@ if __name__ == '__main__':
 
      # Misc
     utils.add_commandline_flag(parser, "--use_gpu", "--use_cpu", True)
-    parser.add_argument("--exp_name", default=None) #None)
+    parser.add_argument("--exp_name", default='exp0005') #None)
 
     # base experiment dir
     base_expdir = "/home/niklas/Documents/mySARCNN_Experiment"
     parser.add_argument("--exp_basedir", default=base_expdir)
-    parser.add_argument("--trainsetiters", type=int, default=2) # original: 640
+    parser.add_argument("--trainsetiters", type=int, default=5) # original: 640
     args = parser.parse_args()
     main_sar(args)
 
