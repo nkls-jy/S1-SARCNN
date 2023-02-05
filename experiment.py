@@ -162,7 +162,7 @@ if __name__ == '__main__':
     
     parser = argparse.ArgumentParser(description='NLM for SAR image denoising')
 
-    parser.add_argument("--sizearea", type=int, default=25) #default=31) #default=25)
+    parser.add_argument("--sizearea", type=int, default=27) #default=31) #default=25)
 
     # Optimizer
     parser.add_argument('--optimizer', default="adam", choices=["adam", "sgd"]) # which optimizer to use
@@ -176,24 +176,24 @@ if __name__ == '__main__':
     parser.add_argument('--adam.lr', type=float, default=0.001) # original=0.001
 
      # Eval mode
-    parser.add_argument('--eval', default=True) #False) # action='store_false')
+    parser.add_argument('--eval', default=False) #False) # action='store_false')
     parser.add_argument('--weights', default=False) # action='store_false')
     parser.add_argument('--eval_epoch', type=int, default=35) #default=50
 
      # Training options
-    parser.add_argument("--batchsize"     , type=int, default= 8) # for home machine: 16
-    parser.add_argument("--patchsize"     , type=int, default=48)# 60)#default=48)
+    parser.add_argument("--batchsize"     , type=int, default= 16) # for home machine: 16
+    parser.add_argument("--patchsize"     , type=int, default=52)# 60)#default=48)
     parser.add_argument("--batchsizevalid", type=int, default=8)
     parser.add_argument("--patchsizevalid", type=int, default=48) # original: default=256) but currently no big valid patches available
 
      # Misc
     utils.add_commandline_flag(parser, "--use_gpu", "--use_cpu", True)
-    parser.add_argument("--exp_name", default='exp0005') #None)
+    parser.add_argument("--exp_name", default=None) #None)
 
     # base experiment dir
     base_expdir = "/home/niklas/Documents/mySARCNN_Experiment"
     parser.add_argument("--exp_basedir", default=base_expdir)
-    parser.add_argument("--trainsetiters", type=int, default=5) # original: 640
+    parser.add_argument("--trainsetiters", type=int, default=100) # original: 640
     args = parser.parse_args()
     main_sar(args)
 
