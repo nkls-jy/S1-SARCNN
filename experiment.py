@@ -162,7 +162,7 @@ if __name__ == '__main__':
     
     parser = argparse.ArgumentParser(description='NLM for SAR image denoising')
 
-    parser.add_argument("--sizearea", type=int, default=27) #default=31) #default=25)
+    parser.add_argument("--sizearea", type=int, default=35) #default=31) #default=25)
 
     # Optimizer
     parser.add_argument('--optimizer', default="adam", choices=["adam", "sgd"]) # which optimizer to use
@@ -182,7 +182,7 @@ if __name__ == '__main__':
 
      # Training options
     parser.add_argument("--batchsize"     , type=int, default= 16) # for home machine: 16
-    parser.add_argument("--patchsize"     , type=int, default=52)# 60)#default=48)
+    parser.add_argument("--patchsize"     , type=int, default=68)# 60)#default=48)
     parser.add_argument("--batchsizevalid", type=int, default=8)
     parser.add_argument("--patchsizevalid", type=int, default=48) # original: default=256) but currently no big valid patches available
 
