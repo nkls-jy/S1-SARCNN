@@ -176,10 +176,11 @@ def make_backnet(nplanes_in, sizearea, bn_momentum=0.1, padding=False):
     features = [169, 225, 289, 361, 441, 529, 625, 729, 841, 961, 1089, sizearea*sizearea]
     #features = [169, 225, 289, 361, 441, 529, 625, 729, 841, sizearea*sizearea]
     #kernels = [7, 5, 3, 3, 3, 3, 3, 3, 3, 3, 3, 1]
+    kernels = [5, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 1]
     #kernels = [5, 5, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 1]
     
     # big kernels
-    kernels = [5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 1]
+    #kernels = [5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 1]
     dilats = [1, ] * depth
     acts = ['leaky_relu', ] * (depth-1) + ['softmax', ]
     bns = [False, ] + [True, ] * (depth-2) + [False, ]
