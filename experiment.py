@@ -135,7 +135,7 @@ def main_sar(args):
         experiment.setup(use_gpu=args.use_gpu)
         load_checkpoint(experiment, args.eval_epoch)
         outdir = os.path.join(experiment.expdir, f"results{args.eval_epoch}")
-        test_list(experiment, outdir, list_testfiles, pad=18)
+        test_list(experiment, outdir, list_testfiles, pad=22)
     else:
         from experiment_utility import trainloop
         from dataloader import PreprocessingInt as Preprocessing
@@ -178,11 +178,11 @@ if __name__ == '__main__':
      # Eval mode
     parser.add_argument('--eval', default=False) #False) # action='store_false')
     parser.add_argument('--weights', default=False) # action='store_false')
-    parser.add_argument('--eval_epoch', type=int, default=35) #default=50
+    parser.add_argument('--eval_epoch', type=int, default=68) #default=50
 
      # Training options
     parser.add_argument("--batchsize"     , type=int, default= 16) # for home machine: 16
-    parser.add_argument("--patchsize"     , type=int, default=68)# 60)#default=48)
+    parser.add_argument("--patchsize"     , type=int, default=88)# 60)#default=48)
     parser.add_argument("--batchsizevalid", type=int, default=8)
     parser.add_argument("--patchsizevalid", type=int, default=48) # original: default=256) but currently no big valid patches available
 
@@ -193,7 +193,7 @@ if __name__ == '__main__':
     # base experiment dir
     base_expdir = "/home/niklas/Documents/mySARCNN_Experiment"
     parser.add_argument("--exp_basedir", default=base_expdir)
-    parser.add_argument("--trainsetiters", type=int, default=100) # original: 640
+    parser.add_argument("--trainsetiters", type=int, default=500) # original: 640
     args = parser.parse_args()
     main_sar(args)
 
