@@ -178,7 +178,7 @@ if __name__ == '__main__':
      # Eval mode
     parser.add_argument('--eval', default=True) #False) # action='store_false')
     parser.add_argument('--weights', default=False) # action='store_false')
-    parser.add_argument('--eval_epoch', type=int, default=35) #default=50
+    parser.add_argument('--eval_epoch', type=int, default=68) #default=50
 
      # Training options
     parser.add_argument("--batchsize"     , type=int, default= 32) # for home machine: 16
