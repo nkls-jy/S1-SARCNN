@@ -270,7 +270,7 @@ def test_list(experiment, outdir, listfile, pad=0):
             noisy_input = img[0]
             noisy_int = torch.from_numpy(noisy_input)[None, None, :, :]
 
-            target = img[1]
+            target = img[1]                   # if target patch is included 
             
             timestamp = time.time()
 
@@ -309,19 +309,21 @@ def test_list(experiment, outdir, listfile, pad=0):
       
             pred_int = pred_int.numpy()[np.newaxis, :, :]
             noisy_input = noisy_input[np.newaxis, :, :]
-            target = target[np.newaxis, :, :]
+            arget = target[np.newaxis, :, :]                 # if target patch is included
 
             print(f"pred_int shape: {pred_int.shape}")
             print(f"noisy_input shape: {noisy_input.shape}")
-            print(f"target shape: {target.shape}")
+            print(f"target shape: {target.shape}")            # if target patch is included
 
 
-            outfile = np.concatenate((pred_int, noisy_input, target))
+            #outfile = np.concatenate((pred_int, noisy_input, target))      # if target patch is included
+            outfile = np.concatenate((pred_int, noisy_input))
 
             # write output file
             kwargs.update(
                 dtype=rasterio.float32,
-                count=3,
+                #count = 2,
+                count = 3,        # if target patch is included
                 compress='lzw'
             )
 
@@ -330,8 +332,8 @@ def test_list(experiment, outdir, listfile, pad=0):
 
             ###### Stats ########
             
-            target_int = torch.from_numpy(target)[np.newaxis, :, :]
-            target_amp = target_int.abs().sqrt()
+            #target_int = torch.from_numpy(target)[np.newaxis, :, :]
+            #target_amp = target_int.abs().sqrt()
 
             if use_cuda:
                 target_amp = target_amp.cuda()

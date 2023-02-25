@@ -178,7 +178,7 @@ if __name__ == '__main__':
      # Eval mode
     parser.add_argument('--eval', default=True) #False) # action='store_false')
     parser.add_argument('--weights', default=False) # action='store_false')
-    parser.add_argument('--eval_epoch', type=int, default=68) #default=50
+    parser.add_argument('--eval_epoch', type=int, default=35) #default=50
 
      # Training options
     parser.add_argument("--batchsize"     , type=int, default= 32) # for home machine: 16
@@ -188,10 +188,11 @@ if __name__ == '__main__':
 
      # Misc
     utils.add_commandline_flag(parser, "--use_gpu", "--use_cpu", True)
-    parser.add_argument("--exp_name", default='exp0009') #None)
+    parser.add_argument("--exp_name", default='exp0009_GRD_d10_k531_lr001_area35_300iterations') #None)
 
     # base experiment dir
-    base_expdir = "/home/niklas/Documents/mySARCNN_Experiment"
+    # base_expdir = "/home/niklas/Documents/mySARCNN_Experiment"
+    base_expdir = "/home/niklas/Documents/Checkpoints/GRD"
     parser.add_argument("--exp_basedir", default=base_expdir)
     parser.add_argument("--trainsetiters", type=int, default=300) # original: 640
     args = parser.parse_args()
