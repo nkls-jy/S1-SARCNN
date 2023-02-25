@@ -188,11 +188,11 @@ if __name__ == '__main__':
 
      # Misc
     utils.add_commandline_flag(parser, "--use_gpu", "--use_cpu", True)
-    parser.add_argument("--exp_name", default='exp0009_GRD_d10_k531_lr001_area35_300iterations') #None)
+    parser.add_argument("--exp_name", default='exp0008_SLC_d10_k531_lr001_area35_300iterations') #None)
 
     # base experiment dir
     # base_expdir = "/home/niklas/Documents/mySARCNN_Experiment"
-    base_expdir = "/home/niklas/Documents/Checkpoints/GRD"
+    base_expdir = "/home/niklas/Documents/Checkpoints/SLC"
     parser.add_argument("--exp_basedir", default=base_expdir)
     parser.add_argument("--trainsetiters", type=int, default=300) # original: 640
     args = parser.parse_args()
