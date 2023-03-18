@@ -1,6 +1,7 @@
 import os 
 
-train_dir = "/home/niklas/Documents/SLC_train_tiles"
+#train_dir = "/home/niklas/Documents/SLC_train_tiles"
+train_dir = "/home/niklas/Documents/GRD_tiles_final"
 #train_dir = "/home/niklas/Documents/GRD_train_tiles"
 #train_dir = "/home/niklas/Documents/traindata_big_cleaned"
 valid_dir = ""
