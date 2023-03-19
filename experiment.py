@@ -176,7 +176,7 @@ if __name__ == '__main__':
     parser.add_argument('--adam.lr', type=float, default=0.001) # original=0.001
 
      # Eval mode
-    parser.add_argument('--eval', default=False) #False) # action='store_false')
+    parser.add_argument('--eval', default=True) #False) # action='store_false')
     parser.add_argument('--weights', default=False) # action='store_false')
     parser.add_argument('--eval_epoch', type=int, default=35) #default=50
 
@@ -188,7 +188,7 @@ if __name__ == '__main__':
 
      # Misc
     utils.add_commandline_flag(parser, "--use_gpu", "--use_cpu", True)
-    parser.add_argument("--exp_name", default=None) #'exp0008_SLC_d10_k531_lr001_area35_300iterations') #None)
+    parser.add_argument("--exp_name", default='exp0001') #'exp0008_SLC_d10_k531_lr001_area35_300iterations') #None)
 
     # base experiment dir
     base_expdir = "/home/niklas/Documents/mySARCNN_Experiment"
