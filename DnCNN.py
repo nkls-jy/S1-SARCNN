@@ -161,6 +161,14 @@ class NlmCNN(nn.Module):
     def forward(self, x):
         w = self.forward_weigths(x)
         y = mul_weights_patches(x, w, self.sizearea, stride=1, padding=self.padding)
+
+        # visualize weights
+        if net.training == False:
+            grid = utils.make_grid(w, nrow=10, normalize=True, scale_each=True)
+
+            plt.figure(figsize(10,10))
+            plt.imshow(grid[0, :])
+
         return y
 
 
