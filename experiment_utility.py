@@ -284,6 +284,7 @@ def test_list(experiment, outdir, listfile, pad=0):
             print(f"noisy for prediction shape: {noisy.shape}")
 
             pred = net(noisy)
+
             pred_int = pred[0, 0, :, :]
 
             if use_cuda:
