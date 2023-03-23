@@ -187,25 +187,25 @@ if __name__ == '__main__':
     parser.add_argument('--adam.lr', type=float, default=0.001) # original=0.001
 
      # Eval mode
-    parser.add_argument('--eval', default=False) #False) # action='store_false')
-    parser.add_argument('--weights', default=True) # action='store_false')
+    parser.add_argument('--eval', default=True) #False) # action='store_false')
+    parser.add_argument('--weights', default=False) # action='store_false')
     parser.add_argument('--eval_epoch', type=int, default=35) #default=50
 
      # Training options
-    parser.add_argument("--batchsize"     , type=int, default= 16) # for home machine: 16
+    parser.add_argument("--batchsize"     , type=int, default=16) # for home machine: 16
     parser.add_argument("--patchsize"     , type=int, default=48)# 60)#default=48)
     parser.add_argument("--batchsizevalid", type=int, default=8)
     parser.add_argument("--patchsizevalid", type=int, default=256) # original: default=256) but currently no big valid patches available
 
      # Misc
     utils.add_commandline_flag(parser, "--use_gpu", "--use_cpu", True)
-    parser.add_argument("--exp_name", default='exp_Wtest') #'exp0008_SLC_d10_k531_lr001_area35_300iterations') #None)
-
+    parser.add_argument("--exp_name", default='exp0004') #'exp0008_SLC_d10_k531_lr001_area35_300iterations') #None)
+        
     # base experiment dir
     base_expdir = "/home/niklas/Documents/mySARCNN_Experiment"
     # base_expdir = "/home/niklas/Documents/Checkpoints/SLC"
     parser.add_argument("--exp_basedir", default=base_expdir)
-    parser.add_argument("--trainsetiters", type=int, default=50) # original: 640
+    parser.add_argument("--trainsetiters", type=int, default=20) # original: 640
     args = parser.parse_args()
     main_sar(args)
 
