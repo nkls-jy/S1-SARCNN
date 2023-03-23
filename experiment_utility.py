@@ -6,6 +6,8 @@ from tqdm import tqdm
 import time
 import rasterio
 import numpy as np
+from  matplotlib import pyplot as plt
+from torchvision import utils
 
 def save_checkpoint(experiment):
     
@@ -240,6 +242,129 @@ def trainloop(experiment, trainloader, data_preprocessing, log_data, validloader
         if validloader is not None:
             test_epoch(experiment, validloader, data_preprocessing, log_data)
         stop = train_epoch(experiment, trainloader, data_preprocessing, log_data)
+
+def export_weights(experiment, outdir, listfile, pad=0):
+
+    from scipy.io import loadmat, savemat
+
+    net = experiment.net
+
+    
+    use_cuda = experiment.use_cuda
+
+    net.eval()
+
+    print(f"listfile: {listfile}")
+    
+    eval_file = os.path.join(outdir, "weights_%s.mat")
+    os.makedirs(outdir, exist_ok=True)
+    
+    
+    with torch.no_grad():
+        for filename in listfile:
+            with rasterio.open(filename) as f:
+                img = f.read()
+                
+                kwargs = f.meta
+
+                noisy_input = img[0]
+                noisy_int = torch.from_numpy(noisy_input)[None, None, :, :]
+
+                if use_cuda:
+                    noisy_int = noisy_int.cuda()
+                if pad > 0:
+                    noisy_int = torch.nn.functional.pad(noisy_int, (pad, pad, pad, pad), mode='reflect', value=0)
+            
+                noisy = noisy_int
+
+
+                weights = net.forward_weights(noisy, reshape=True)
+
+                fname = filename.split('/', 1)[0]
+
+                output_filename = eval_file % fname
+
+                datout = dict()
+                datout['weights'] = weights.cpu().numpy()
+                savemat(output_filename, datout)
+
+                print(" done")
+
+    
+    
+    
+    '''
+    with torch.no_grad():
+        for filename in listfile:
+            with rasterio.open(filename) as f:
+                img = f.read()
+                
+                kwargs = f.meta
+
+            noisy_input = img[0]
+            noisy_int = torch.from_numpy(noisy_input)[None, None, :, :]
+
+            if use_cuda:
+                noisy_int = noisy_int.cuda()
+            if pad > 0:
+                noisy_int = torch.nn.functional.pad(noisy_int, (pad, pad, pad, pad), mode='reflect', value=0)
+        
+            noisy = noisy_int
+
+            print(f"noisy for prediction shape: {noisy.shape}")
+
+            pred = net(noisy)
+            weights = net.forward_weights(noisy, reshape=True)
+            #w = net(noisy)[0]
+
+    
+    print(weights.shape)
+    weights = weights.cpu().numpy().squeeze()
+
+    print(f"len weights[0]: {len(weights[0])}")
+
+    # export weights
+    #for i in range(len(weights[0])):
+    #    for j in range(len(weights[1])):
+
+    out_dir = os.path.join(outdir, "weights_%s_%s.tif")
+
+    for i in range(5):
+        for j in range(5):
+            #print(f"i: {i}")
+
+            #output_filename = out_dir % i % j
+            output_filename = os.path.join(outdir, f"weigths_{i}_{j}.tif")
+
+            w_img = weights[i, j, :, :]
+
+            print(f"w_img shape: {w_img.shape}")
+
+            w_img = w_img[np.newaxis, :, :]
+
+            kwargs.update(
+                dtype= rasterio.float32,
+                count = 1,
+                compress = 'lzw'
+            )
+            
+            with rasterio.open(output_filename, 'w', **kwargs) as dst:
+                dst.write(w_img.astype(rasterio.float32))
+
+
+    #test_w = weights[:, 0, 0, :, :].squeeze()
+    #print(test_w.shape)
+    
+    #plt.imshow(test_w)
+    #plt.show()
+
+    # weights = weights.view((1, 280, 25, 25))
+    
+    #grid = utils.make_grid(weights, nrow=10, normalize=True, scale_each=True)
+    #plt.figure(figsize=(10,10))
+    #plt.imshow(grid[0, :])
+
+    '''
 
 def test_list(experiment, outdir, listfile, pad=0):
     net = experiment.net

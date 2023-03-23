@@ -1,6 +1,7 @@
 import math 
 import torch.nn as nn
 
+
 def conv_with_padding(in_planes, out_planes, kernelsize, stride=1, dilation=1, bias=False, padding = None):
     """
     in_planes: number of channels in the input image
@@ -139,7 +140,7 @@ class NlmCNN(nn.Module):
         self.padding = padding
         #self.sar_data = sar_data
 
-    def forward_weigths(self, x, reshape=False):
+    def forward_weights(self, x, reshape=False):
         
         #x_in = x.abs().log() / 2.0
 
@@ -159,15 +160,8 @@ class NlmCNN(nn.Module):
             return w
 
     def forward(self, x):
-        w = self.forward_weigths(x)
+        w = self.forward_weights(x)
         y = mul_weights_patches(x, w, self.sizearea, stride=1, padding=self.padding)
-
-        # visualize weights
-        if net.training == False:
-            grid = utils.make_grid(w, nrow=10, normalize=True, scale_each=True)
-
-            plt.figure(figsize(10,10))
-            plt.imshow(grid[0, :])
 
         return y
 
@@ -178,10 +172,11 @@ Function for backnet
 def make_backnet(nplanes_in, sizearea, bn_momentum=0.1, padding=False):
     #depth = 15
     #depth = 12
-    depth = 8 # for bigger Sizearea
-    
-    features = [441, 529, 625, 729, 841, 961, 1089, sizearea*sizearea]
-    #features = [441, 529, 625, 729, 841, 961, 1089, 1225, 1369, sizearea * sizearea] # features for big Sizearea and shallower network
+    #depth = 8 # for bigger Sizearea
+    depth = 10
+
+    #features = [441, 529, 625, 729, 841, 961, 1089, sizearea*sizearea]
+    features = [441, 529, 625, 729, 841, 961, 1089, 1225, 1369, sizearea * sizearea] # features for big Sizearea and shallower network
     # features: large sizearea, deep network
     #features = [225, 256, 289, 324, 361, 441, 520, 625, 729, 841, 961, 1089, 1156, 1225, sizearea*sizearea]
     # features: default sizearea (25)
@@ -189,11 +184,11 @@ def make_backnet(nplanes_in, sizearea, bn_momentum=0.1, padding=False):
     #features = [169, 225, 289, 361, 441, 529, 625, 729, 841, sizearea*sizearea]
     #kernels = [7, 5, 3, 3, 3, 3, 3, 3, 3, 3, 3, 1]
 
-    kernels = [5, 3, 3, 3, 3, 3, 3, 1]
-    #kernels = [5, 3, 3, 3, 3, 3, 3, 3, 3, 1]  # Kernels for big Sizearea and shallower network
+    #kernels = [5, 3, 3, 3, 3, 3, 3, 1]
+    kernels = [5, 3, 3, 3, 3, 3, 3, 3, 3, 1]  # Kernels for big Sizearea and shallower network
     #kernels = [5, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 1]
     #kernels = [5, 5, 3, 3, 3, 3, 3, 3, 3, 3, 3, 1]
-    #kernels = [5, 5, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 1]
+    #kernels = [5, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 1]
     
     # big kernels
     #kernels = [5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 1]

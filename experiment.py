@@ -124,8 +124,18 @@ def main_sar(args):
     patchsize = args.patchsize
 
     if args.weights:
-        pass
-        #from experiment_utility import load_checkpoint, test_list_weights
+        # export weights
+        from experiment_utility import load_checkpoint, export_weights
+        from paths import list_testfiles
+
+        assert(args.exp_name is not None)
+        experiment = Experiment(exp_basedir, args.exp_name)
+        experiment.setup(use_gpu=args.use_gpu)
+        load_checkpoint(experiment, args.eval_epoch)
+        outdir = os.path.join(experiment.expdir, f"weights")
+
+        export_weights(experiment, outdir, list_testfiles, pad=0)
+
     elif args.eval:
         from experiment_utility import load_checkpoint, test_list
         from paths import list_testfiles
@@ -136,6 +146,7 @@ def main_sar(args):
         load_checkpoint(experiment, args.eval_epoch)
         outdir = os.path.join(experiment.expdir, f"results{args.eval_epoch}")
         test_list(experiment, outdir, list_testfiles, pad=22)
+
     else:
         from experiment_utility import trainloop
         from dataloader import PreprocessingInt as Preprocessing
@@ -177,7 +188,7 @@ if __name__ == '__main__':
 
      # Eval mode
     parser.add_argument('--eval', default=False) #False) # action='store_false')
-    parser.add_argument('--weights', default=False) # action='store_false')
+    parser.add_argument('--weights', default=True) # action='store_false')
     parser.add_argument('--eval_epoch', type=int, default=35) #default=50
 
      # Training options
@@ -188,13 +199,13 @@ if __name__ == '__main__':
 
      # Misc
     utils.add_commandline_flag(parser, "--use_gpu", "--use_cpu", True)
-    parser.add_argument("--exp_name", default=None) #'exp0008_SLC_d10_k531_lr001_area35_300iterations') #None)
+    parser.add_argument("--exp_name", default='exp_Wtest') #'exp0008_SLC_d10_k531_lr001_area35_300iterations') #None)
 
     # base experiment dir
     base_expdir = "/home/niklas/Documents/mySARCNN_Experiment"
     # base_expdir = "/home/niklas/Documents/Checkpoints/SLC"
     parser.add_argument("--exp_basedir", default=base_expdir)
-    parser.add_argument("--trainsetiters", type=int, default=100) # original: 640
+    parser.add_argument("--trainsetiters", type=int, default=50) # original: 640
     args = parser.parse_args()
     main_sar(args)
 
