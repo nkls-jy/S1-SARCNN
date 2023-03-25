@@ -245,6 +245,8 @@ def trainloop(experiment, trainloader, data_preprocessing, log_data, validloader
 
 def export_weights(experiment, outdir, listfile, pad=0):
 
+    '''
+
     from scipy.io import loadmat, savemat
 
     net = experiment.net
@@ -290,10 +292,19 @@ def export_weights(experiment, outdir, listfile, pad=0):
 
                 print(" done")
 
-    
-    
-    
     '''
+
+    net = experiment.net
+
+    
+    use_cuda = experiment.use_cuda
+
+    net.eval()
+
+    print(f"listfile: {listfile}")
+    
+    os.makedirs(outdir, exist_ok=True)
+    
     with torch.no_grad():
         for filename in listfile:
             with rasterio.open(filename) as f:
@@ -317,40 +328,63 @@ def export_weights(experiment, outdir, listfile, pad=0):
             weights = net.forward_weights(noisy, reshape=True)
             #w = net(noisy)[0]
 
-    
-    print(weights.shape)
-    weights = weights.cpu().numpy().squeeze()
-
-    print(f"len weights[0]: {len(weights[0])}")
-
-    # export weights
-    #for i in range(len(weights[0])):
-    #    for j in range(len(weights[1])):
-
-    out_dir = os.path.join(outdir, "weights_%s_%s.tif")
-
-    for i in range(5):
-        for j in range(5):
-            #print(f"i: {i}")
-
-            #output_filename = out_dir % i % j
-            output_filename = os.path.join(outdir, f"weigths_{i}_{j}.tif")
-
-            w_img = weights[i, j, :, :]
-
-            print(f"w_img shape: {w_img.shape}")
-
-            w_img = w_img[np.newaxis, :, :]
-
-            kwargs.update(
-                dtype= rasterio.float32,
-                count = 1,
-                compress = 'lzw'
-            )
             
-            with rasterio.open(output_filename, 'w', **kwargs) as dst:
-                dst.write(w_img.astype(rasterio.float32))
+            print(f"weights shape: {weights.shape}")
 
+            weights = weights.cpu().numpy().squeeze()
+
+            print(f"weights new shape: {weights.shape}")
+
+            #print(weights)
+
+            print(f"len weights[0]: {len(weights)}")
+            print(f"len weights[1]: {len(weights[1])}")
+            print(f"len weights[2]: {len(weights[2])}")
+            print(f"len weights[3]: {len(weights[3])}")
+
+            print(f"pixel or array: {weights[0, 0, 0, 0]}")
+
+            print(f"array size: {weights[1].size}")
+
+            # export weights
+            #for i in range(len(weights[0])):
+            #    for j in range(len(weights[1])):
+
+            out_dir = os.path.join(outdir, "weights_%s_%s.tif")
+
+            #for i in range(len(weights)):
+            #    for j in range(len(weights[0])):
+
+            for i in range(40):
+                for j in range(40):
+                    #print(f"i: {i}")
+
+                    fname =  filename.rsplit('/', 1)[1].rsplit(".", 1)[0]
+
+                    output_filename = os.path.join(outdir, f"weigths_{fname}_{i}_{j}.tif")
+
+                    w_img = weights[i, j, :, :]
+
+                    print(f"w_img shape: {w_img.shape}")
+
+                    
+                    #w_img = w_img[np.newaxis, :, :]
+
+
+                    plt.imshow(w_img)
+                    plt.savefig(output_filename)
+
+                    '''
+                    kwargs.update(
+                        dtype= rasterio.float32,
+                        count = 1,
+                        compress = 'lzw'
+                    )
+                    
+                    with rasterio.open(output_filename, 'w', **kwargs) as dst:
+                        dst.write(w_img.astype(rasterio.float32))
+
+                    '''
 
     #test_w = weights[:, 0, 0, :, :].squeeze()
     #print(test_w.shape)
@@ -363,8 +397,6 @@ def export_weights(experiment, outdir, listfile, pad=0):
     #grid = utils.make_grid(weights, nrow=10, normalize=True, scale_each=True)
     #plt.figure(figsize=(10,10))
     #plt.imshow(grid[0, :])
-
-    '''
 
 def test_list(experiment, outdir, listfile, pad=0):
     net = experiment.net

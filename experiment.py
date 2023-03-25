@@ -23,7 +23,7 @@ class Experiment:
                                             padding=False
                                             )
         
-        net = DnCNN.NlmCNN(network_weights, sizearea=sizearea, padding=False)
+        net = DnCNN.NlmCNN(network_weights, sizearea=sizearea, sar_data = True, padding=False)
 
         return net
 
@@ -134,7 +134,7 @@ def main_sar(args):
         load_checkpoint(experiment, args.eval_epoch)
         outdir = os.path.join(experiment.expdir, f"weights")
 
-        export_weights(experiment, outdir, list_testfiles, pad=0)
+        export_weights(experiment, outdir, list_testfiles, pad=22)
 
     elif args.eval:
         from experiment_utility import load_checkpoint, test_list
@@ -187,7 +187,7 @@ if __name__ == '__main__':
     parser.add_argument('--adam.lr', type=float, default=0.001) # original=0.001
 
      # Eval mode
-    parser.add_argument('--eval', default=False) #False) # action='store_false')
+    parser.add_argument('--eval', default=True) #False) # action='store_false')
     parser.add_argument('--weights', default=False) # action='store_false')
     parser.add_argument('--eval_epoch', type=int, default=35) #default=50
 
@@ -199,13 +199,13 @@ if __name__ == '__main__':
 
      # Misc
     utils.add_commandline_flag(parser, "--use_gpu", "--use_cpu", True)
-    parser.add_argument("--exp_name", default=None) #'exp0008_SLC_d10_k531_lr001_area35_300iterations') #None)
+    parser.add_argument("--exp_name", default='exp0008') #'exp0008_SLC_d10_k531_lr001_area35_300iterations') #None)
         
     # base experiment dir
     base_expdir = "/home/niklas/Documents/mySARCNN_Experiment"
-    # base_expdir = "/home/niklas/Documents/Checkpoints/SLC"
+    #base_expdir = "/home/niklas/Documents/weight_test"
     parser.add_argument("--exp_basedir", default=base_expdir)
-    parser.add_argument("--trainsetiters", type=int, default=20) # original: 640
+    parser.add_argument("--trainsetiters", type=int, default=100) # original: 640
     args = parser.parse_args()
     main_sar(args)
 

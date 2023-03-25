@@ -131,26 +131,29 @@ Model Definition
 """
 
 class NlmCNN(nn.Module):
-    def __init__(self, network_weights, sizearea, padding = False):
+    def __init__(self, network_weights, sizearea, sar_data = False, padding = False):
         
         super(NlmCNN, self).__init__()
         
         self.network_weights = network_weights
         self.sizearea = sizearea
         self.padding = padding
-        #self.sar_data = sar_data
+        self.sar_data = sar_data
 
     def forward_weights(self, x, reshape=False):
         
         #x_in = x.abs().log() / 2.0
 
-        #if self.sar_data:
-        #    x_in = x.abs().log() / 2.0
-        #else:
-        #    x_in = x
-        x_in = x
+        if self.sar_data:
+            x_in = x.abs().log() / 2.0
+        else:
+            x_in = x
+        
+        #x_in = x
         
         w = self.network_weights(x_in)
+
+        #print(f"weights shape out: {w.shape}")
 
         if reshape:
             w = w.permute(0, 2, 3, 1)
